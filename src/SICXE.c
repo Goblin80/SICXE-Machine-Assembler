@@ -14,13 +14,12 @@
 
 void printSymbolTable(program *p)
 {
-    operation *t = p->op;
-
+    symbolEntry *e = p->st.entry;
     for(int i = 0; i < 17; i++) printf("%c", 215); printf("\n");
 
-    for(int i = 0;i < p->lines; i++, t++)
-        if(!isStrEq(t->label, ""))
-            printf("%c %04X %c %-6s %c\n", 186, t->loc, 186, t->label, 186);
+    for(int i = 0; i < p->st.len; i++, e++)
+        printf("%c %04X %c %-6s %c\n", 186, e->value, 186, e->symbol, 186);
+
     for (int i = 0; i < 17; i++) printf("%c", 215);
 }
 
@@ -30,7 +29,6 @@ void printPObject(program *p)
     for(int i = 0;i < p->lines; i++, t++)
         printf("%04X\t%-10s%-10s%-10s%-10s\n",
                 t->loc, t->label, t->operator.mnemonic, t->operand, t->objectcode);
-
 }
 
 void parseSRC(program *p, char fname[])

@@ -39,15 +39,6 @@ short getOpcode(char m[sSIZE])
     return -1;
 }
 
-short getLabelLocation(program *p, char a[sSIZE])
-{
-    if(isStrEq(a, "")) return 0;
-	for(int i = 0; i < p->len; i++)
-		if(isStrEq(p->op[i].label, a))
-			return p->op[i].loc;
-	return -1;
-}
-
 short getOpsize(char m[sSIZE])
 {
     short f = 0;
@@ -55,5 +46,15 @@ short getOpsize(char m[sSIZE])
     for(int i = 0;i < sizeof t / sizeof (instruction); i++)
         if(isStrEq(t[i].mnemonic, m))
             return t[i].format + f;
+    return -1;
+}
+
+short getLabelLocation(program *p, char a[sSIZE])
+{
+    symbolEntry *e = p->st.entry;
+    if(isStrEq(a, "")) return 0;
+    for(int i = 0; i < p->st.len; i++, e++)
+        if(isStrEq(e->symbol, a))
+            return e->value;
     return -1;
 }

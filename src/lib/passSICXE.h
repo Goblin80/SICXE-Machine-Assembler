@@ -15,7 +15,7 @@ void pass0(operation *out, char in[], const char d[]) // split
     strcpy(out->operand, a[k + 1]);
 }
 
-void pass1(program *p) //LOC
+void pass1(program *p) // LOC
 {
     char *s = p->op[0].operator.mnemonic, *t;
     short LOCCTR = 0, i = 0, *w;
@@ -51,7 +51,14 @@ void pass1(program *p) //LOC
         else if(isAsmFunc(s) == 1) *w = 0, c->loc = 0;
         else *w = getOpsize(s);
 
+        if(!isStrEq(c->label, "")) // append to the symbol table
+        {
+            strcpy(p->st.entry[p->st.len].symbol, c->label);
+            p->st.entry[p->st.len++].value = LOCCTR;
+        }
+
         LOCCTR += *w;
+
     }
     p->len = LOCCTR - p->op[0].loc;
 }
