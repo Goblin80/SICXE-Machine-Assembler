@@ -2,9 +2,9 @@
 
 void pass0(operation *out, char in[], const char d[]) // split
 {
-	char a[3][sSIZE];
-	memset(a, 0, sizeof a);
-	int i = 0, k;
+    char a[3][sSIZE];
+    memset(a, 0, sizeof a);
+    int i = 0, k;
     for(char *t = strtok(in, d); t; t = strtok(NULL, d))
         strcpy(a[i++], strCapitalize(t));
         
@@ -20,25 +20,25 @@ void pass1(program *p) // LOC
     char *s = p->op[0].operator.mnemonic, *t;
     short LOCCTR = 0, l = p->lines, *w;
     if(isStrEq(s, "START"))
-		sscanf(p->op[0].operand, "%hx", &LOCCTR);
+        sscanf(p->op[0].operand, "%hx", &LOCCTR);
     
     for(operation *c = p->op; l--; c++)
     {
-		c->loc = LOCCTR;
+        c->loc = LOCCTR;
         s = c->operator.mnemonic;
         t = c->operand;
         w = &c->opwidth;
         
         if(isStrEq(s, "BYTE"))
-			switch(t[0])
-			{
-				case 'X':
-					*w = (strlen(t) - 2) / 2;
-					break;
-				case 'C':
-					*w = strlen(t) - 3;
-					break;
-			}
+            switch(t[0])
+            {
+                case 'X':
+                    *w = (strlen(t) - 2) / 2;
+                    break;
+                case 'C':
+                    *w = strlen(t) - 3;
+                    break;
+            }
         else if(isStrEq(s, "RESW")) *w = 3 * strInt(t);
         else if(isStrEq(s, "RESB")) *w = strInt(t);
         else if(isStrEq(s, "WORD")) // *w = 3;
@@ -117,11 +117,73 @@ void pass2(program *p)
             }
             else if(isStrEq(s, "WORD"))
             {
-                sscanf(t, "%d", &b);
+                sscanf(t, "%hd", &b);
                 sprintf(c->objectcode, "%03X", b);
             }
         }
 
 
     }
+}
+
+void hRECORD(program *p)
+{
+    operation *s = p->op;
+    char out[tBufferSIZE];
+    sprintf(out, "H^%-6s^%06X^%06X", s->label, s->loc, p->len);
+    printf("%s\n", out);
+}
+
+void tRECORD(program *p)
+{
+    operation *s = p->op;
+    char tBuffer[tBufferSIZE], out[tBufferSIZE];
+    short tBufferLoc = s->loc, tBufferLen = 0, l;
+
+    memset(tBuffer, 0, sizeof tBuffer);
+    while(!isStrEq(s++->operator.mnemonic, "END"))
+    {
+        if(isStrEq(s->operator.mnemonic, "BASE")) continue; //cheap fix, very cheap
+        l = strlen(s->objectcode) / 2;
+        // l = s->opwidth;
+        if((tBufferLen + l > rSIZE || !l) && tBufferLen) //rSIZE is 0x1E
+        {
+            sprintf(out, "T^%06X^%02X%s", tBufferLoc, tBufferLen, tBuffer);
+            memset(tBuffer, tBufferLen = 0, tBufferSIZE); //size of what the pointer points... doesn't work
+            printf("%s\n", out);
+        }
+
+        if(!l) continue;
+        if(!tBufferLen) tBufferLoc = s->loc;
+        strcat(tBuffer, "^");
+        strcat(tBuffer, s->objectcode);
+        tBufferLen += l;
+    }
+}
+
+void eRECORD(program *p)
+{
+    char out[tBufferSIZE];
+    sprintf(out, "E^%06X", p->op[0].loc);
+    printf("%s\n", out);
+}
+
+void mRECORD(program *p)
+{
+    operation *s = p->op;
+    char out[tBufferSIZE];
+    while(!isStrEq(s++->operator.mnemonic, "END"))
+        if(s->operator.format == 4 && s->operand[0] != '#')
+        {
+            sprintf(out, "M^%06X^05", s->loc + 1);
+            printf("%s\n", out);
+        }
+}
+
+void genHTE(program *p) //generate HTE Record
+{
+    hRECORD(p);
+    tRECORD(p);
+    eRECORD(p);
+    mRECORD(p);
 }

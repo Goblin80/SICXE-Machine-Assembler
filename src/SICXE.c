@@ -49,9 +49,9 @@ int main()
     program p = {0, 0}; // a new program with length zero
     parseSRC(&p, "../test/sample.txt");
 
-    // printf("%d %x \n", p.lines, p.len);
     // printSymbolTable(&p);
     printPObject(&p);
+    // genHTE(&p);
      return 0;
 }
 

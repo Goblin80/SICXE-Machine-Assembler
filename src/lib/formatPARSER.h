@@ -36,7 +36,7 @@ void parseFormat3(program *p, operation *c, short PC, short BASE)
             c->flag |= 1 << 4; //set i
             if(t[0] < 'A')
             {
-                sscanf(t, "%3X", &TA);
+                sscanf(t, "%3hX", &TA);
                 sprintf(c->objectcode, "%03X%03X", c->operator.opcode << 4 | c->flag, TA);
                 return;
             }
@@ -53,7 +53,7 @@ void parseFormat3(program *p, operation *c, short PC, short BASE)
         if(t[i] == ',')
             c->flag |= 1 << 3;
 
-    if(TA - PC < 1<<11)
+    if(TA - PC < 1<<11 && TA - PC > -1<<11)
     {
         disp.value = TA - PC;
         c->flag |= 1 << 1; //set p
@@ -63,6 +63,8 @@ void parseFormat3(program *p, operation *c, short PC, short BASE)
         disp.value = TA - BASE;
         c->flag |= 1 << 2; //set b
     }
+    else
+        disp.value = 0; // invalid, throw an error
     sprintf(c->objectcode, "%03X%03X", c->operator.opcode << 4 | c->flag, disp.value);
 }
 
@@ -80,7 +82,7 @@ void parseFormat4(program *p, operation *c)
         c->flag |= 1 << 4; //set i
         t++; // skips '#'
         if(t[0] < 'A')
-            sscanf(t, "%05X", &TA);
+            sscanf(t, "%05hX", &TA);
     }
     sprintf(c->objectcode, "%03X%05X", c->operator.opcode << 4 | c->flag, TA);
 }
