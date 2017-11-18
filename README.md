@@ -6,5 +6,5 @@
 
 Use -std=c11 switch when compiling:
 ```bash
-gcc -std=c11 SIC.c
+gcc -std=c11 SICXE.c
 ```

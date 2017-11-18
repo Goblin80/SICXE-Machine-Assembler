@@ -49,11 +49,14 @@ short getOpsize(char m[sSIZE])
     return -1;
 }
 
-short getLabelLocation(program *p, char a[sSIZE])
+short getLabelLocation(program *p, char c[sSIZE])
 {
+    char *a, b[sSIZE];
     symbolEntry *e = p->st.entry;
+    strcpy(b, c); strtok(b, ","); a = b;
     if(a[0] == '#' || a[0] == '@') a++;
     if(isStrEq(a, "")) return 0;
+
     for(int i = 0; i < p->st.len; i++, e++)
         if(isStrEq(e->symbol, a))
             return e->value;
