@@ -8,7 +8,8 @@ typedef struct
 typedef struct
 {
     short loc,
-    	  opwidth;
+    	  opwidth,
+          flag;
     instruction operator;
     char label[6 + 1],
          operand[sSIZE],

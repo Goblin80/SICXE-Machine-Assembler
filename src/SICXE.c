@@ -9,6 +9,7 @@
 #include "lib/declareDATA.h"
 #include "lib/xtraSTR.h"
 #include "lib/MDAFs.h"
+#include "lib/formatPARSER.h"
 #include "lib/passSICXE.h"
 
 
@@ -40,6 +41,7 @@ void parseSRC(program *p, char fname[])
         pass0(t, s, " \t");
     
     pass1(p);
+    pass2(p);
 }
 
 int main()
@@ -50,7 +52,6 @@ int main()
     // printf("%d %x \n", p.lines, p.len);
     // printSymbolTable(&p);
     printPObject(&p);
-
      return 0;
 }
 

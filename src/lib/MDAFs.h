@@ -52,9 +52,27 @@ short getOpsize(char m[sSIZE])
 short getLabelLocation(program *p, char a[sSIZE])
 {
     symbolEntry *e = p->st.entry;
+    if(a[0] == '#' || a[0] == '@') a++;
     if(isStrEq(a, "")) return 0;
     for(int i = 0; i < p->st.len; i++, e++)
         if(isStrEq(e->symbol, a))
             return e->value;
     return -1;
+}
+
+short getRegisterNumeric(char r[])
+{
+    char registers[][3] = {"A", "X", "L", "B", "S", "T", "F", "?", "PC", "SW"};
+    for(int i = 0; i < sizeof(registers) / sizeof(*registers); i++)
+        if(isStrEq(r, registers[i]))
+            return i;
+    return 0;
+}
+
+void setFlag(short *f, char flag)
+{
+    char bits[] = {'e', 'p', 'b', 'x', 'i', 'n'};
+    for(int i = 0; i < sizeof(bits); i++)
+            if(flag == bits[i])
+                *f |= 1 << i;
 }
