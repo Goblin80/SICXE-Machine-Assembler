@@ -32,7 +32,8 @@ typedef struct
 typedef struct
 {
 	short len,
-		  lines;
+		  lines,
+          literalCount;
 	operation op[pSIZE];
     symbolTable st;
 }program;

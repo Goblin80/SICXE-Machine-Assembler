@@ -2,7 +2,7 @@ int isAsmFunc(char x[sSIZE])
 {
     char t[][sSIZE] = { "START", "END", "BYTE",
                         "WORD", "RESB", "RESW",
-                        "BASE", "ORG" ,"EQU"};
+                        "BASE", "ORG" ,"EQU", "LTORG"};
     for(int i = 0; i < sizeof t / sSIZE; i++)
         if(isStrEq(t[i], x)) return 1;
     return -1;

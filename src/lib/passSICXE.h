@@ -1,6 +1,6 @@
 #define tBufferSIZE 256
 
-void pass0(operation *out, char in[], const char d[]) // split
+void pass0(program *p, operation *out, char in[], const char d[]) // split
 {
     char a[3][sSIZE];
     memset(a, 0, sizeof a);
@@ -13,6 +13,9 @@ void pass0(operation *out, char in[], const char d[]) // split
     
     strcpy(out->operator.mnemonic, a[k]);
     strcpy(out->operand, a[k + 1]);
+
+    if(out->operand[0] == '=')
+        p->literalCount++;
 }
 
 void pass1(program *p) // LOC
@@ -48,16 +51,41 @@ void pass1(program *p) // LOC
                 if(t[i] == ',') commas++;
             *w = 3 * commas;
         }
+
+        else if(isStrEq(s, "LTORG"))
+        {
+            c->loc = 0;
+            symbolEntry *e = p->st.entry;
+            for(int i = 0; i < p->st.len; i++, e++)
+                if(e->symbol[0] == '=')
+                {
+                    c++;
+                    strcpy(c->operator.mnemonic, e->symbol);
+
+                    c->opwidth = strlen(c->operator.mnemonic) - 4;
+                    c->loc = e->value = LOCCTR;
+
+                    strcpy(c->label, "*");
+                }
+        }
+
         else if(isAsmFunc(s) == 1) *w = c->loc = 0;
         else c->operator.format = *w = getOpsize(s),
              c->operator.opcode = getOpcode(s);
+
+        if(t[0] == '=') // append literal to symbol table
+        {
+            strcpy(p->st.entry[p->st.len].symbol, t);
+            p->st.entry[p->st.len++].value = 0;
+        }
 
         if(!isStrEq(c->label, "")) // append to the symbol table
         {
             strcpy(p->st.entry[p->st.len].symbol, c->label);
             p->st.entry[p->st.len++].value = LOCCTR;
         }
-        LOCCTR += *w;
+
+        LOCCTR += c->opwidth; // *w refers to an previous operation
     }
     p->len = LOCCTR - p->op[0].loc;
 }
@@ -99,7 +127,16 @@ void pass2(program *p)
             }
         else
         {
-            if(isStrEq(s, "BYTE"))
+            if(s[0] == '=')
+            {
+                sscanf(s, "=C'%[^']'", a);
+                for(int j = 0; a[j] != '\0'; j++)
+                {
+                    sprintf(charBuffer, "%02X", a[j]);
+                    strcat(c->objectcode, charBuffer);
+                }
+            }
+            else if(isStrEq(s, "BYTE"))
             switch(t[0]) // maybe i should pack this
             {
                 case 'X':
@@ -144,6 +181,7 @@ void tRECORD(program *p)
     while(!isStrEq(s++->operator.mnemonic, "END"))
     {
         if(isStrEq(s->operator.mnemonic, "BASE")) continue; //cheap fix, very cheap
+        // if(s->loc == 0) continue; //try this 
         l = strlen(s->objectcode) / 2;
         // l = s->opwidth;
         if((tBufferLen + l > rSIZE || !l) && tBufferLen) //rSIZE is 0x1E
@@ -170,9 +208,10 @@ void eRECORD(program *p)
 
 void mRECORD(program *p)
 {
-    operation *s = p->op;
+    short i = 0;
     char out[tBufferSIZE];
-    while(!isStrEq(s++->operator.mnemonic, "END"))
+    // while(!isStrEq(s++->operator.mnemonic, "END")) // assuming no literals after end of program
+    for(operation *s = p->op; i < p->lines; i++, s++)
         if(s->operator.format == 4 && s->operand[0] != '#')
         {
             sprintf(out, "M^%06X^05", s->loc + 1);
@@ -184,6 +223,6 @@ void genHTE(program *p) //generate HTE Record
 {
     hRECORD(p);
     tRECORD(p);
-    eRECORD(p);
     mRECORD(p);
+    eRECORD(p);
 }

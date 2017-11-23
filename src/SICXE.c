@@ -38,7 +38,16 @@ void parseSRC(program *p, char fname[])
     freopen(fname, "r", stdin);
 
     for(operation *t = p->op; scanf("%[^\n]%*c", s) != EOF; t++, p->lines++)
-        pass0(t, s, " \t");
+    {
+        pass0(p, t, s, " \t");
+
+        if(isStrEq(t->operator.mnemonic, "LTORG")) // Make room for literals
+        {
+            t += p->literalCount;
+            p->lines += p->literalCount;
+            p->literalCount = 0;
+        }
+    }
     
     pass1(p);
     pass2(p);
@@ -46,8 +55,10 @@ void parseSRC(program *p, char fname[])
 
 int main()
 {
-    program p = {0, 0}; // a new program with length zero
-    parseSRC(&p, "../test/sample.txt");
+    program p; // a new program with length zero
+    memset(&p, 0, sizeof p); // playing safe
+    // parseSRC(&p, "../test/sample.txt");
+    parseSRC(&p, "../test/sample2.txt");
 
     // printSymbolTable(&p);
     printPObject(&p);
