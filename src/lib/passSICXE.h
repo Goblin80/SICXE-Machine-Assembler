@@ -1,18 +1,22 @@
 #define tBufferSIZE 256
 
-void pass0(operation *out, char in[], const char d[]) // split
+int pass0(operation *out, char in[], const char d[]) // split
 {
     char a[3][sSIZE];
     memset(a, 0, sizeof a);
-    int i = 0, k;
+    int tok_count = 0, k;
     for(char *t = strtok(in, d); t; t = strtok(NULL, d))
-        strcpy(a[i++], strCapitalize(t));
-        
-    if((k = isAsmFunc(a[0]) == -1 && getOpcode(a[0]) == -1))
-        strcpy(out->label, a[0]);
+        strcpy(a[tok_count++], strCapitalize(t));
+
+    if(tok_count)
+    {
+        if((k = isAsmFunc(a[0]) == -1 && getOpcode(a[0]) == -1))
+            strcpy(out->label, a[0]);
     
-    strcpy(out->operator.mnemonic, a[k]);
-    strcpy(out->operand, a[k + 1]);
+        strcpy(out->operator.mnemonic, a[k]);
+        strcpy(out->operand, a[k + 1]);
+    }
+    return tok_count;
 }
 
 void pass1(program *p) // LOC
@@ -184,6 +188,6 @@ void genHTE(program *p) //generate HTE Record
 {
     hRECORD(p);
     tRECORD(p);
-    eRECORD(p);
     mRECORD(p);
+    eRECORD(p);
 }

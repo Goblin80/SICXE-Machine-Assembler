@@ -37,8 +37,7 @@ void parseSRC(program *p, char fname[])
     char s[sSIZE];
     freopen(fname, "r", stdin);
 
-    for(operation *t = p->op; scanf("%[^\n]%*c", s) != EOF; t++, p->lines++)
-        pass0(t, s, " \t");
+    for(operation *t = p->op; scanf("%[^\n]%*c", s) != EOF; pass0(t, s, " \t") ? t++, p->lines++ : 0);
     
     pass1(p);
     pass2(p);
